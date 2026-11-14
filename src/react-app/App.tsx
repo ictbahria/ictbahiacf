@@ -1,189 +1,185 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import "./App.css";
 
 type Story = {
   category: string;
   title: string;
-  summary: string;
-  readTime: string;
+  excerpt: string;
   image: string;
   imageAlt: string;
+  author: string;
+  readTime: string;
+  featured?: boolean;
 };
 
 const stories: Story[] = [
   {
-    category: "Digital life",
-    title: "A calmer, clearer way to manage software updates",
-    summary:
-      "A practical routine for knowing what needs attention, what can wait, and where to get updates safely.",
-    readTime: "5 min read",
+    category: "Technology",
+    title: "The small technologies making a big difference in everyday life",
+    excerpt:
+      "A closer look at the thoughtful tools and ideas changing how we work, connect, and make time for what matters.",
     image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=960&q=85",
-    imageAlt: "A bright, organized workspace with a laptop and notebook",
-  },
-  {
-    category: "How-to guides",
-    title: "The small settings that make your accounts safer",
-    summary:
-      "Simple, worthwhile checks to help protect your everyday accounts without adding more complexity.",
-    readTime: "4 min read",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=960&q=85",
-    imageAlt: "People working together around a laptop",
-  },
-  {
-    category: "Tech explained",
-    title: "What happens when you update an app?",
-    summary:
-      "A plain-language look at new features, bug fixes, and why a little maintenance matters.",
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=85",
+    imageAlt: "A bright, modern workspace with a laptop and notebook",
+    author: "Maya Bennett",
     readTime: "6 min read",
+    featured: true,
+  },
+  {
+    category: "Ideas",
+    title: "A more considered way to keep up with the world",
+    excerpt:
+      "When everything asks for our attention, a little perspective can make all the difference.",
     image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=960&q=85",
-    imageAlt: "A close-up of a thoughtfully designed electronic circuit board",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Sunlit shared studio with a long wooden table",
+    author: "Oliver James",
+    readTime: "4 min read",
+  },
+  {
+    category: "Business",
+    title: "What the next generation of independent businesses gets right",
+    excerpt:
+      "From stronger communities to more intentional growth, a new playbook is taking shape.",
+    image:
+      "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "A small team sharing ideas around a table",
+    author: "Amara Cole",
+    readTime: "5 min read",
+  },
+  {
+    category: "Living",
+    title: "Making room for a little more outside in the everyday",
+    excerpt:
+      "Simple, practical ways to bring the restorative feeling of nature closer to home.",
+    image:
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80",
+    imageAlt: "Warm afternoon light filtering through a green forest",
+    author: "Nina Patel",
+    readTime: "3 min read",
   },
 ];
 
-const categories = ["All stories", "Digital life", "How-to guides", "Tech explained"];
+const categories = ["All stories", "Technology", "Ideas", "Business", "Living"];
 
 function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
   return diagonal ? (
     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-      <path d="M5 15 15 5M6 5h9v9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 15 15 5M6 5h9v9" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   ) : (
     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-      <path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" />
     </svg>
-  );
-}
-
-function BrandMark() {
-  return (
-    <span className="brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 36 36" fill="none">
-        <rect x="1" y="1" width="34" height="34" rx="12" fill="currentColor" />
-        <path d="M10 19.2 15.4 24 26 12" stroke="white" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M10 12.5h5" stroke="white" strokeOpacity=".7" strokeWidth="2.2" strokeLinecap="round" />
-      </svg>
-    </span>
   );
 }
 
 function App() {
   const [activeCategory, setActiveCategory] = useState("All stories");
-  const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [signupMessage, setSignupMessage] = useState("");
 
   const filteredStories = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
     return stories.filter((story) => {
-      const matchesCategory = activeCategory === "All stories" || story.category === activeCategory;
-      const matchesQuery =
-        !normalizedQuery ||
-        `${story.title} ${story.summary} ${story.category}`.toLowerCase().includes(normalizedQuery);
-      return matchesCategory && matchesQuery;
+      const matchesCategory =
+        activeCategory === "All stories" || story.category === activeCategory;
+      const matchesSearch =
+        !query ||
+        `${story.title} ${story.excerpt} ${story.category} ${story.author}`
+          .toLowerCase()
+          .includes(query);
+      return matchesCategory && matchesSearch;
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, search]);
+
+  function handleSubscribe(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!email.trim()) return;
+    setSignupMessage("Thanks for your interest. Newsletter sign-up is coming soon.");
+    setEmail("");
+  }
 
   return (
     <div className="site-shell">
-      <div className="announcement-bar">
-        <span className="announcement-dot" />
-        Thoughtful reads for a more confident digital life
-        <a href="#stories" className="announcement-link">
-          Explore the latest <ArrowIcon />
-        </a>
+      <div className="topline">
+        <p>A little more perspective, every day.</p>
+        <a href="#latest">Discover the latest <ArrowIcon /></a>
       </div>
 
       <header className="site-header">
-        <a className="brand" href="#home" aria-label="E-Updates home">
-          <BrandMark />
-          <span className="brand-name">e-updates<span>.</span></span>
+        <a className="wordmark" href="#home" aria-label="E-Updates home">
+          <span className="wordmark-mark">e<span>.</span></span>
+          <span className="wordmark-name">updates</span>
         </a>
         <button
           className="menu-toggle"
           type="button"
           aria-label={menuOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen((open) => !open)}
         >
           <span />
           <span />
         </button>
-        <nav className={`main-nav${menuOpen ? " is-open" : ""}`} aria-label="Main navigation">
-          <a href="#stories" onClick={() => setMenuOpen(false)}>Latest stories</a>
-          <a href="#topics" onClick={() => setMenuOpen(false)}>Explore topics</a>
-          <a href="#about" onClick={() => setMenuOpen(false)}>About us</a>
-          <a className="nav-cta" href="#stories" onClick={() => setMenuOpen(false)}>
-            Find your next read <ArrowIcon diagonal />
-          </a>
+        <nav className={menuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
+          <a href="#latest" onClick={() => setMenuOpen(false)}>Latest</a>
+          <a href="#latest" onClick={() => { setActiveCategory("Technology"); setMenuOpen(false); }}>Technology</a>
+          <a href="#latest" onClick={() => { setActiveCategory("Ideas"); setMenuOpen(false); }}>Ideas</a>
+          <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
         </nav>
+        <a className="header-cta" href="#newsletter">Get the weekly edit <ArrowIcon diagonal /></a>
       </header>
 
       <main id="home">
-        <section className="hero section-wrap" aria-labelledby="hero-title">
+        <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-line" /> THE GOOD SIDE OF WHAT'S NEW</div>
-            <h1 id="hero-title">Stay in the know.<br /><span>Stay at ease.</span></h1>
-            <p className="hero-description">
-              Clear, useful perspectives on technology and the digital world—so you can make the most of what’s next.
+            <div className="eyebrow"><span className="eyebrow-line" /> The thoughtful read</div>
+            <h1 id="hero-title">A fresh take on what’s <em>happening.</em></h1>
+            <p className="hero-intro">
+              Good stories. New perspectives. A more considered way to stay in the know.
             </p>
-            <div className="hero-actions">
-              <a className="button button-primary" href="#stories">Explore the stories <ArrowIcon /></a>
-              <a className="text-link" href="#about">A little about us <ArrowIcon diagonal /></a>
-            </div>
-            <div className="hero-note">
-              <span className="note-icon" aria-hidden="true">✳</span>
-              Made for curious people. Written to make sense.
-            </div>
+            <a className="olive-button" href="#latest">Explore the latest <ArrowIcon /></a>
+            <div className="hero-note"><span className="note-dot" /> Curiosity, with a little more clarity.</div>
           </div>
-          <div className="hero-art" aria-label="A calm, light-filled desk with a laptop">
+          <div className="hero-visual">
             <img
-              src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=88"
-              alt="A sunlit modern workspace with plants and a desk"
-              fetchPriority="high"
+              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1500&q=85"
+              alt="A winding path through a sunlit landscape"
             />
-            <div className="hero-image-wash" />
-            <div className="hero-sticker"><span>GOOD TO</span><strong>know</strong><i>✳</i></div>
-            <div className="feature-card">
-              <div className="feature-topline"><span className="feature-label">A GOOD PLACE TO START</span><span className="feature-number">01 / 03</span></div>
-              <h2>A little more clarity.<br />A lot less noise.</h2>
-              <a href="#stories" aria-label="Read our latest stories">Discover the latest <ArrowIcon /></a>
-            </div>
-            <span className="hero-caption">A fresh perspective, whenever you need one.</span>
+            <div className="image-caption"><span>LOOK CLOSER</span><span>Find a new point of view</span></div>
+            <div className="hero-stamp" aria-hidden="true"><span>READ</span><span>WELL</span><i>✳</i></div>
           </div>
         </section>
 
-        <section className="value-strip" aria-label="What you can expect">
-          <div className="value-inner">
-            <div className="value-item"><span className="value-icon">✳</span><span><strong>Useful by design</strong><small>Ideas you can put to work</small></span></div>
-            <div className="value-item"><span className="value-icon value-icon-outline">↗</span><span><strong>Easy to understand</strong><small>Good information, simply told</small></span></div>
-            <div className="value-item"><span className="value-icon value-icon-leaf">✺</span><span><strong>Made for real life</strong><small>Technology, in human terms</small></span></div>
-            <div className="value-tag">A BETTER KIND OF UPDATE <span>→</span></div>
-          </div>
+        <section className="featured-strip" aria-label="Our approach">
+          <p>For the curious, the thoughtful, and the always learning.</p>
+          <div><span>01</span> Interesting ideas</div>
+          <div><span>02</span> Fresh perspectives</div>
+          <div><span>03</span> Room to think</div>
         </section>
 
-        <section className="stories-section section-wrap" id="stories" aria-labelledby="stories-title">
+        <section className="latest-section" id="latest" aria-labelledby="latest-title">
           <div className="section-heading">
             <div>
-              <div className="eyebrow"><span className="eyebrow-line" /> THE LATEST</div>
-              <h2 id="stories-title">A little something <em>new.</em></h2>
-              <p>Fresh ideas and helpful guides for the things you do every day.</p>
+              <div className="eyebrow"><span className="eyebrow-line" /> The reading list</div>
+              <h2 id="latest-title">Worth your <em>attention.</em></h2>
             </div>
             <label className="search-box">
-              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><circle cx="8.8" cy="8.8" r="5.8" stroke="currentColor" strokeWidth="1.6" /><path d="m13.2 13.2 4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+              <span className="visually-hidden">Search stories</span>
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><circle cx="8.8" cy="8.8" r="5.8" stroke="currentColor" strokeWidth="1.5"/><path d="m13.2 13.2 4 4" stroke="currentColor" strokeWidth="1.5"/></svg>
               <input
                 type="search"
-                aria-label="Search stories"
-                placeholder="Search stories"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Find a story"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
               />
-              <span className="search-shortcut">⌕</span>
             </label>
           </div>
 
-          <div className="category-tabs" id="topics" role="group" aria-label="Filter stories by topic">
+          <div className="category-tabs" role="group" aria-label="Filter stories by category">
             {categories.map((category) => (
               <button
                 className={activeCategory === category ? "category-tab active" : "category-tab"}
@@ -199,52 +195,63 @@ function App() {
 
           {filteredStories.length > 0 ? (
             <div className="story-grid">
-              {filteredStories.map((story, index) => (
-                <article className={`story-card${index === 0 ? " story-card-featured" : ""}`} key={story.title}>
+              {filteredStories.map((story) => (
+                <article className={story.featured ? "story-card story-card-featured" : "story-card"} key={story.title}>
                   <a className="story-image" href="#about" aria-label={`Read: ${story.title}`}>
                     <img src={story.image} alt={story.imageAlt} loading="lazy" />
                     <span className="image-arrow"><ArrowIcon diagonal /></span>
                   </a>
-                  <div className="story-meta"><span>{story.category}</span><span>{story.readTime}</span></div>
-                  <h3><a href="#about">{story.title}</a></h3>
-                  <p>{story.summary}</p>
-                  <a className="story-read-link" href="#about">Read the story <ArrowIcon /></a>
+                  <div className="story-content">
+                    <div className="story-meta"><span>{story.category}</span><span>{story.readTime}</span></div>
+                    <h3><a href="#about">{story.title}</a></h3>
+                    <p>{story.excerpt}</p>
+                    <div className="story-byline"><span className="author-avatar">{story.author.split(" ").map((part) => part[0]).join("")}</span> By {story.author}</div>
+                  </div>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="empty-state" role="status">
-              <span>✳</span><h3>No stories found just yet.</h3><p>Try a different search or choose another topic.</p>
-              <button className="text-link" type="button" onClick={() => { setQuery(""); setActiveCategory("All stories"); }}>Show all stories <ArrowIcon /></button>
-            </div>
+            <p className="empty-state">No stories match that search. Try another topic or keyword.</p>
           )}
-          <div className="stories-footer"><span>GOOD THINGS TAKE A LITTLE CURIOSITY.</span><a href="#topics">Explore all topics <ArrowIcon /></a></div>
         </section>
 
-        <section className="about-section" id="about" aria-labelledby="about-title">
-          <div className="about-inner section-wrap">
-            <div className="about-decoration" aria-hidden="true"><span>e</span><i>✳</i></div>
-            <div className="about-copy">
-              <div className="eyebrow"><span className="eyebrow-line" /> A NOTE FROM US</div>
-              <h2 id="about-title">The digital world moves fast.<br /><em>Understanding it can feel easy.</em></h2>
-              <p>E-Updates is a place for thoughtful, approachable reads about technology and everyday digital life. No jargon, no overwhelm—just useful ideas to help you feel a little more informed.</p>
-              <a className="button button-light" href="#stories">Get to know our stories <ArrowIcon /></a>
-            </div>
-            <div className="about-quote"><span>“</span><p>Good information should make life feel simpler, not louder.</p><div className="quote-rule" />E-UPDATES EDITORIAL</div>
+        <section className="newsletter" id="newsletter" aria-labelledby="newsletter-title">
+          <div className="newsletter-decoration" aria-hidden="true">e.</div>
+          <div className="newsletter-copy">
+            <div className="eyebrow"><span className="eyebrow-line" /> A good thing in your inbox</div>
+            <h2 id="newsletter-title">Make space for <em>something good.</em></h2>
+            <p>A thoughtful weekly edit of stories and ideas worth carrying into your week.</p>
           </div>
+          <form className="newsletter-form" onSubmit={handleSubscribe}>
+            <label className="visually-hidden" htmlFor="newsletter-email">Your email address</label>
+            <div className="email-field">
+              <input
+                id="newsletter-email"
+                type="email"
+                placeholder="Your email address"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+              <button type="submit" aria-label="Join the newsletter"><ArrowIcon /></button>
+            </div>
+            <p aria-live="polite">{signupMessage || "No noise. Just a little inspiration, once a week."}</p>
+          </form>
+        </section>
+
+        <section className="about-section" id="about">
+          <span className="about-mark" aria-hidden="true">✳</span>
+          <div><div className="eyebrow"><span className="eyebrow-line" /> A note from us</div><h2>Stay informed.<br /><em>Stay open.</em></h2></div>
+          <p>E-Updates is a home for ideas, stories, and perspectives that make the everyday a little more interesting. Take what resonates, follow your curiosity, and come back whenever you need a fresh point of view.</p>
+          <a className="text-link" href="#home">Back to the top <ArrowIcon diagonal /></a>
         </section>
       </main>
 
       <footer className="site-footer">
-        <div className="footer-main section-wrap">
-          <div className="footer-brand-block">
-            <a className="brand brand-footer" href="#home"><BrandMark /><span className="brand-name">e-updates<span>.</span></span></a>
-            <p>A brighter take on the digital world.<br />Useful updates, made human.</p>
-          </div>
-          <div className="footer-links"><span>TAKE A LOOK</span><a href="#stories">Latest stories</a><a href="#topics">Explore topics</a><a href="#about">About E-Updates</a></div>
-          <div className="footer-note"><span>STAY CURIOUS</span><p>Come back anytime for a fresh perspective and a little more clarity.</p><a href="#home">Back to the top ↑</a></div>
-        </div>
-        <div className="footer-bottom section-wrap"><span>© {new Date().getFullYear()} E-Updates. All rights reserved.</span><span>Made for curious people, everywhere.</span><a href="#home">e-updates.com</a></div>
+        <a className="wordmark footer-wordmark" href="#home" aria-label="E-Updates home"><span className="wordmark-mark">e<span>.</span></span><span className="wordmark-name">updates</span></a>
+        <p>Curiosity looks good on you.</p>
+        <div className="footer-links"><a href="#about">About</a><a href="mailto:hello@e-updates.com">Contact</a><a href="#newsletter">Newsletter</a></div>
+        <small>© {new Date().getFullYear()} E-Updates. All rights reserved.</small>
       </footer>
     </div>
   );
