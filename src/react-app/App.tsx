@@ -1,118 +1,95 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useState } from "react";
 import "./App.css";
 
-type Story = {
-  category: string;
-  title: string;
-  excerpt: string;
-  image: string;
-  imageAlt: string;
-  author: string;
-  readTime: string;
-  featured?: boolean;
-};
-
-const stories: Story[] = [
+const courses = [
   {
-    category: "Technology",
-    title: "The small technologies making a big difference in everyday life",
-    excerpt:
-      "A closer look at the thoughtful tools and ideas changing how we work, connect, and make time for what matters.",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=85",
-    imageAlt: "A bright, modern workspace with a laptop and notebook",
-    author: "Maya Bennett",
-    readTime: "6 min read",
-    featured: true,
+    number: "01",
+    icon: "▦",
+    category: "DIGITAL FOUNDATIONS",
+    title: "IT Skills",
+    subtitle: "Office applications & AI productivity",
+    description:
+      "Build practical skills in documents, spreadsheets, presentations, databases, and email—with an introduction to productivity and automation using artificial intelligence.",
+    tags: ["Office applications", "AI productivity", "Practical skills"],
   },
   {
-    category: "Ideas",
-    title: "A more considered way to keep up with the world",
-    excerpt:
-      "When everything asks for our attention, a little perspective can make all the difference.",
-    image:
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Sunlit shared studio with a long wooden table",
-    author: "Oliver James",
-    readTime: "4 min read",
+    number: "02",
+    icon: "⌘",
+    category: "STEM · FOR KIDS & BEGINNERS",
+    title: "STEM Robotics",
+    subtitle: "A journey from block coding to ROS",
+    description:
+      "Explore robotics through fun, interactive activities. Learners move from block-based coding to robotics concepts and ROS at a pace that suits them.",
+    tags: ["Block coding", "Robotics", "STEM learning"],
   },
   {
-    category: "Business",
-    title: "What the next generation of independent businesses gets right",
-    excerpt:
-      "From stronger communities to more intentional growth, a new playbook is taking shape.",
-    image:
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "A small team sharing ideas around a table",
-    author: "Amara Cole",
-    readTime: "5 min read",
+    number: "03",
+    icon: "✳",
+    category: "EMERGING TECHNOLOGY",
+    title: "Applied Artificial Intelligence",
+    subtitle: "For business, development & digital transformation",
+    description:
+      "A hands-on introduction to applying artificial intelligence in business and development, with a focus on useful skills and real-world possibilities.",
+    tags: ["Applied AI", "Digital transformation", "Hands-on"],
   },
   {
-    category: "Living",
-    title: "Making room for a little more outside in the everyday",
-    excerpt:
-      "Simple, practical ways to bring the restorative feeling of nature closer to home.",
-    image:
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80",
-    imageAlt: "Warm afternoon light filtering through a green forest",
-    author: "Nina Patel",
-    readTime: "3 min read",
+    number: "04",
+    icon: "</>",
+    category: "CODING & DEVELOPMENT",
+    title: "Full-Spectrum Python",
+    subtitle: "From data and web to AI, ERP & IoT",
+    description:
+      "Grow your Python skills across programming, web development, data, artificial intelligence, ERP, and the Internet of Things.",
+    tags: ["Python", "Web development", "Data & IoT"],
   },
 ];
 
-const categories = ["All stories", "Technology", "Ideas", "Business", "Living"];
+const footerGroups = [
+  {
+    title: "Learn with us",
+    links: ["Trainings", "ICT Tutorials", "ICT Guides", "ICT Guides in Urdu", "ICT Exam Prep", "O/A Level Tuition"],
+  },
+  {
+    title: "Explore technology",
+    links: ["ICT Security", "STEM Robotics", "For Kids", "For Educators", "ICT Engineering", "Artificial Intelligence", "Data Engineering", "Data Analytics"],
+  },
+  {
+    title: "Projects & ideas",
+    links: ["Autonomous Vehicle", "Robotic Arm", "Quadcopter", "ICT Trends", "Quantum Computing", "Semiconductor Tech"],
+  },
+  {
+    title: "Community",
+    links: ["ICT Genius", "Quran.com", "Live Makkah", "Live Madinah", "Contact"],
+  },
+];
 
-function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
+function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return diagonal ? (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-      <path d="M5 15 15 5M6 5h9v9" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="M5 15 15 5M6 5h9v9" stroke="currentColor" strokeWidth="1.6" /></svg>
   ) : (
-    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
-      <path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="M3.5 10h12m-5-5 5 5-5 5" stroke="currentColor" strokeWidth="1.6" /></svg>
   );
 }
 
 function App() {
-  const [activeCategory, setActiveCategory] = useState("All stories");
-  const [search, setSearch] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [signupMessage, setSignupMessage] = useState("");
 
-  const filteredStories = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return stories.filter((story) => {
-      const matchesCategory =
-        activeCategory === "All stories" || story.category === activeCategory;
-      const matchesSearch =
-        !query ||
-        `${story.title} ${story.excerpt} ${story.category} ${story.author}`
-          .toLowerCase()
-          .includes(query);
-      return matchesCategory && matchesSearch;
-    });
-  }, [activeCategory, search]);
-
-  function handleSubscribe(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!email.trim()) return;
-    setSignupMessage("Thanks for your interest. Newsletter sign-up is coming soon.");
-    setEmail("");
+  function closeMenu() {
+    setMenuOpen(false);
   }
 
   return (
-    <div className="site-shell">
-      <div className="topline">
-        <p>A little more perspective, every day.</p>
-        <a href="#latest">Discover the latest <ArrowIcon /></a>
+    <div className="site-shell" id="home">
+      <div className="announcement-bar">
+        <span className="announcement-dot" />
+        <span>Curiosity today. Capability tomorrow.</span>
+        <a href="#trainings">Explore our trainings <Arrow /></a>
       </div>
 
       <header className="site-header">
-        <a className="wordmark" href="#home" aria-label="E-Updates home">
-          <span className="wordmark-mark">e<span>.</span></span>
-          <span className="wordmark-name">updates</span>
+        <a className="brand" href="#home" aria-label="ICT Club home">
+          <span className="brand-symbol" aria-hidden="true">i<span>c</span></span>
+          <span className="brand-copy"><strong>ICT Club</strong><small>LEARN · BUILD · GROW</small></span>
         </a>
         <button
           className="menu-toggle"
@@ -121,137 +98,131 @@ function App() {
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
         >
-          <span />
-          <span />
+          <span /><span />
         </button>
         <nav className={menuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
-          <a href="#latest" onClick={() => setMenuOpen(false)}>Latest</a>
-          <a href="#latest" onClick={() => { setActiveCategory("Technology"); setMenuOpen(false); }}>Technology</a>
-          <a href="#latest" onClick={() => { setActiveCategory("Ideas"); setMenuOpen(false); }}>Ideas</a>
-          <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
+          <a href="#home" onClick={closeMenu}>Home</a>
+          <a href="#about" onClick={closeMenu}>About</a>
+          <a href="#trainings" onClick={closeMenu}>Trainings</a>
+          <a href="#community" onClick={closeMenu}>Blogs</a>
+          <a href="#contact" onClick={closeMenu}>Contact</a>
         </nav>
-        <a className="header-cta" href="#newsletter">Get the weekly edit <ArrowIcon diagonal /></a>
+        <a className="header-cta" href="#trainings">Explore classes <Arrow diagonal /></a>
       </header>
 
-      <main id="home">
+      <main>
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-line" /> The thoughtful read</div>
-            <h1 id="hero-title">A fresh take on what’s <em>happening.</em></h1>
-            <p className="hero-intro">
-              Good stories. New perspectives. A more considered way to stay in the know.
+          <div className="hero-content">
+            <div className="eyebrow"><span /> A community for curious minds</div>
+            <h1 id="hero-title">Skills for a world that keeps <em>moving.</em></h1>
+            <p className="hero-description">
+              An online community club advancing IT skills, STEM robotics, artificial intelligence, and programming education for learners of all ages.
             </p>
-            <a className="olive-button" href="#latest">Explore the latest <ArrowIcon /></a>
-            <div className="hero-note"><span className="note-dot" /> Curiosity, with a little more clarity.</div>
-          </div>
-          <div className="hero-visual">
-            <img
-              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1500&q=85"
-              alt="A winding path through a sunlit landscape"
-            />
-            <div className="image-caption"><span>LOOK CLOSER</span><span>Find a new point of view</span></div>
-            <div className="hero-stamp" aria-hidden="true"><span>READ</span><span>WELL</span><i>✳</i></div>
-          </div>
-        </section>
-
-        <section className="featured-strip" aria-label="Our approach">
-          <p>For the curious, the thoughtful, and the always learning.</p>
-          <div><span>01</span> Interesting ideas</div>
-          <div><span>02</span> Fresh perspectives</div>
-          <div><span>03</span> Room to think</div>
-        </section>
-
-        <section className="latest-section" id="latest" aria-labelledby="latest-title">
-          <div className="section-heading">
-            <div>
-              <div className="eyebrow"><span className="eyebrow-line" /> The reading list</div>
-              <h2 id="latest-title">Worth your <em>attention.</em></h2>
+            <div className="hero-actions">
+              <a className="button button-primary" href="#trainings">Discover our trainings <Arrow /></a>
+              <a className="button-text" href="#about">Get to know ICT Club <Arrow diagonal /></a>
             </div>
-            <label className="search-box">
-              <span className="visually-hidden">Search stories</span>
-              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><circle cx="8.8" cy="8.8" r="5.8" stroke="currentColor" strokeWidth="1.5"/><path d="m13.2 13.2 4 4" stroke="currentColor" strokeWidth="1.5"/></svg>
-              <input
-                type="search"
-                placeholder="Find a story"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </label>
+            <div className="hero-proof"><span className="proof-icon">✳</span><span>Learn by doing. Build skills for life.</span></div>
           </div>
+          <div className="hero-art" role="img" aria-label="Abstract illustration of connected ideas and technology">
+            <div className="art-grid" />
+            <div className="orbit orbit-one" />
+            <div className="orbit orbit-two" />
+            <div className="orbit-core"><span>ICT</span><small>COMMUNITY<br />CLUB</small></div>
+            <div className="orbit-node node-code"><span>&lt;/&gt;</span><small>CODE</small></div>
+            <div className="orbit-node node-ai"><span>✳</span><small>AI</small></div>
+            <div className="orbit-node node-robot"><span>⌘</span><small>ROBOTICS</small></div>
+            <div className="orbit-node node-data"><span>▥</span><small>IT SKILLS</small></div>
+            <div className="art-caption"><span className="caption-line" /> LEARN · BUILD · GROW</div>
+            <span className="art-spark spark-one">✳</span><span className="art-spark spark-two">✳</span>
+          </div>
+        </section>
 
-          <div className="category-tabs" role="group" aria-label="Filter stories by category">
-            {categories.map((category) => (
-              <button
-                className={activeCategory === category ? "category-tab active" : "category-tab"}
-                key={category}
-                type="button"
-                aria-pressed={activeCategory === category}
-                onClick={() => setActiveCategory(category)}
-              >
-                {category}
-              </button>
+        <section className="intro-band" id="about">
+          <div className="intro-label"><span className="section-index">01</span><span>ABOUT ICT CLUB</span></div>
+          <div className="intro-copy">
+            <h2>Technology is better<br />when we learn it <em>together.</em></h2>
+            <p>ICT Community Club is an online learning community based in Bahria Town, Lahore, Pakistan. We help learners build practical computer and technology skills through guided sessions, tuition, tutorials, and approachable learning resources.</p>
+            <a className="underlined-link" href="#contact">Meet the community <Arrow /></a>
+          </div>
+          <div className="intro-stat"><strong>01<span>—</span></strong><p>A place to explore, learn, and make things.</p></div>
+        </section>
+
+        <section className="training-section" id="trainings" aria-labelledby="training-title">
+          <div className="section-topline"><div className="eyebrow"><span /> LEARN SOMETHING NEW</div><span className="section-index">02 / TRAININGS</span></div>
+          <div className="training-heading">
+            <div><h2 id="training-title">Build skills.<br /><em>Build what’s next.</em></h2></div>
+            <p>Expert-led 1:1 and group-based online IT, robotics, and coding classes. Interactive, practical learning designed to help kids and professionals move forward with confidence.</p>
+          </div>
+          <div className="course-grid">
+            {courses.map((course) => (
+              <article className="course-card" key={course.number}>
+                <div className="course-card-top"><span className="course-number">{course.number}</span><span className="course-icon" aria-hidden="true">{course.icon}</span></div>
+                <div className="course-category">{course.category}</div>
+                <h3>{course.title}</h3>
+                <h4>{course.subtitle}</h4>
+                <p>{course.description}</p>
+                <div className="course-tags">{course.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                <a className="course-link" href="#contact">Read more <Arrow /></a>
+              </article>
             ))}
           </div>
-
-          {filteredStories.length > 0 ? (
-            <div className="story-grid">
-              {filteredStories.map((story) => (
-                <article className={story.featured ? "story-card story-card-featured" : "story-card"} key={story.title}>
-                  <a className="story-image" href="#about" aria-label={`Read: ${story.title}`}>
-                    <img src={story.image} alt={story.imageAlt} loading="lazy" />
-                    <span className="image-arrow"><ArrowIcon diagonal /></span>
-                  </a>
-                  <div className="story-content">
-                    <div className="story-meta"><span>{story.category}</span><span>{story.readTime}</span></div>
-                    <h3><a href="#about">{story.title}</a></h3>
-                    <p>{story.excerpt}</p>
-                    <div className="story-byline"><span className="author-avatar">{story.author.split(" ").map((part) => part[0]).join("")}</span> By {story.author}</div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="empty-state">No stories match that search. Try another topic or keyword.</p>
-          )}
         </section>
 
-        <section className="newsletter" id="newsletter" aria-labelledby="newsletter-title">
-          <div className="newsletter-decoration" aria-hidden="true">e.</div>
-          <div className="newsletter-copy">
-            <div className="eyebrow"><span className="eyebrow-line" /> A good thing in your inbox</div>
-            <h2 id="newsletter-title">Make space for <em>something good.</em></h2>
-            <p>A thoughtful weekly edit of stories and ideas worth carrying into your week.</p>
+        <section className="learning-section" aria-labelledby="learning-title">
+          <div className="learning-visual">
+            <div className="learning-photo" role="img" aria-label="A creative workspace ready for hands-on learning">
+              <div className="photo-note"><span>IDEAS INTO ACTION</span><strong>Make it.<br /><em>Understand it.</em></strong></div>
+              <span className="photo-orbit" aria-hidden="true">✳</span>
+            </div>
+            <div className="photo-footnote"><span>ICT COMMUNITY CLUB</span><span>BAHRIA TOWN · LAHORE</span></div>
           </div>
-          <form className="newsletter-form" onSubmit={handleSubscribe}>
-            <label className="visually-hidden" htmlFor="newsletter-email">Your email address</label>
-            <div className="email-field">
-              <input
-                id="newsletter-email"
-                type="email"
-                placeholder="Your email address"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-              <button type="submit" aria-label="Join the newsletter"><ArrowIcon /></button>
-            </div>
-            <p aria-live="polite">{signupMessage || "No noise. Just a little inspiration, once a week."}</p>
-          </form>
+          <div className="learning-copy">
+            <div className="eyebrow"><span /> LEARNING THAT FITS YOUR LIFE</div>
+            <h2 id="learning-title">Learn it today.<br />Use it <em>tomorrow.</em></h2>
+            <p>Take the first step toward stronger skills in IT, programming, STEM robotics, or artificial intelligence. Our guided, hands-on sessions help you turn curiosity into practical knowledge.</p>
+            <ul className="benefit-list">
+              <li><span className="benefit-check">✓</span><span><strong>Experienced trainer</strong><small>Learn from a professional with deep expertise in computer courses.</small></span></li>
+              <li><span className="benefit-check">✓</span><span><strong>Hands-on practical training</strong><small>Build projects and apply what you learn—not just theory.</small></span></li>
+              <li><span className="benefit-check">✓</span><span><strong>Flexible schedule</strong><small>Evening and weekend online classes to fit your routine.</small></span></li>
+            </ul>
+            <a className="button button-primary" href="#contact">Find your next class <Arrow /></a>
+          </div>
         </section>
 
-        <section className="about-section" id="about">
-          <span className="about-mark" aria-hidden="true">✳</span>
-          <div><div className="eyebrow"><span className="eyebrow-line" /> A note from us</div><h2>Stay informed.<br /><em>Stay open.</em></h2></div>
-          <p>E-Updates is a home for ideas, stories, and perspectives that make the everyday a little more interesting. Take what resonates, follow your curiosity, and come back whenever you need a fresh point of view.</p>
-          <a className="text-link" href="#home">Back to the top <ArrowIcon diagonal /></a>
+        <section className="schedule-section">
+          <div className="schedule-icon" aria-hidden="true"><span>◷</span></div>
+          <div className="schedule-main"><div className="eyebrow"><span /> MAKE LEARNING WORK FOR YOU</div><h2>Good skills.<br /><em>On your schedule.</em></h2></div>
+          <div className="schedule-detail"><h3>Evenings & weekends</h3><p>Our flexible online training sessions are held on evenings or weekends, so students and professionals can learn without disrupting their weekly routine.</p><a className="underlined-link" href="#contact">Ask about the schedule <Arrow /></a></div>
+          <span className="schedule-decoration" aria-hidden="true">✳</span>
+        </section>
+
+        <section className="closing-cta" id="contact">
+          <div className="closing-ornament" aria-hidden="true">ICT<span>.</span></div>
+          <div className="eyebrow"><span /> YOUR NEXT CHAPTER STARTS HERE</div>
+          <h2>Curiosity is a great<br />place to <em>start.</em></h2>
+          <p>Ready to grow your skills? Explore ICT Club trainings and take your next step in technology.</p>
+          <a className="button button-light" href="mailto:hello@e-updates.com">Get in touch <Arrow /></a>
         </section>
       </main>
 
-      <footer className="site-footer">
-        <a className="wordmark footer-wordmark" href="#home" aria-label="E-Updates home"><span className="wordmark-mark">e<span>.</span></span><span className="wordmark-name">updates</span></a>
-        <p>Curiosity looks good on you.</p>
-        <div className="footer-links"><a href="#about">About</a><a href="mailto:hello@e-updates.com">Contact</a><a href="#newsletter">Newsletter</a></div>
-        <small>© {new Date().getFullYear()} E-Updates. All rights reserved.</small>
+      <footer className="site-footer" id="community">
+        <div className="footer-main">
+          <div className="footer-brand-column">
+            <a className="brand footer-brand" href="#home" aria-label="ICT Club home"><span className="brand-symbol" aria-hidden="true">i<span>c</span></span><span className="brand-copy"><strong>ICT Club</strong><small>LEARN · BUILD · GROW</small></span></a>
+            <p>The ICT Community Club, Bahria Town Lahore, Pakistan, advances ICT, STEM robotics, artificial intelligence, and programming skills through tuition, tutorials, guides, and hands-on learning.</p>
+            <address>ICT Club, Nishtar Commercial,<br />Sector E, Violet Block, Bahria Town,<br />Lahore, 53720, Pakistan.</address>
+            <div className="social-links" aria-label="Social media"><a href="https://www.linkedin.com/" aria-label="LinkedIn">in</a><a href="https://www.facebook.com/" aria-label="Facebook">f</a><a href="https://www.tiktok.com/" aria-label="TikTok">♪</a><a href="https://www.youtube.com/" aria-label="YouTube">▶</a><a href="https://www.pinterest.com/" aria-label="Pinterest">p</a></div>
+          </div>
+          {footerGroups.map((group) => (
+            <div className="footer-link-group" key={group.title}><h3>{group.title}</h3>{group.links.map((link) => <a href={link === "Contact" ? "#contact" : "#trainings"} key={link}>{link}</a>)}</div>
+          ))}
+        </div>
+        <div className="footer-bottom">
+          <span>© 2026 ICT Club · e-updates.com</span>
+          <p><strong>GDPR & privacy.</strong> We collect only the personal data needed to provide educational services, respond to inquiries, and improve your experience. We do not sell or share your information with third parties. You may request access to, correction of, or deletion of your data by contacting us.</p>
+          <a href="mailto:hello@e-updates.com">Privacy enquiries <Arrow diagonal /></a>
+        </div>
       </footer>
     </div>
   );
